@@ -984,13 +984,13 @@ nm programa | grep area_circulo
 **P13.** Enlazá con `gcc programa.o matematica.o -o programa`.
 Ejecutá `nm programa | grep "area_circulo"` y copiá la salida.
 
-> **R:**
+> **R:** 0000000140001600 T area_circulo
 
 ¿Con qué letra aparece ahora `area_circulo` en el ejecutable final?
 Escribí solo la letra:
 
 <!-- Completá con la letra exacta que muestra nm: -->
-TIPO_AREA_ENLAZADO=
+TIPO_AREA_ENLAZADO=T
 
 ---
 
@@ -1006,17 +1006,18 @@ Quedan algunos `U` incluso en el ejecutable final. ¿Por qué? Son funciones de 
 
 **P14.** Ejecutá `nm programa | grep "^ *U"` y copiá la salida.
 
-> **R:**
+> **R:**                  U __end__
+
 
 ¿Quedan símbolos de tipo `U` en el ejecutable final?
 Respondé SI o NO:
 
 <!-- Completá con SI o NO: -->
-SIMBOLOS_U_FINAL=
+SIMBOLOS_U_FINAL=SI
 
 ¿Por qué quedan? ¿Quién los resuelve y cuándo?
 
-> **R:**
+> **R:** Quedan símbolos de tipo `U` en el ejecutable final ya que se tratan de funciones de biblioteca dinámica, que serán resueltas por el cargador dinámico en tiempo de ejecución.
 
 ---
 
@@ -1030,12 +1031,27 @@ SIMBOLOS_U_FINAL=
 
 **P15.** Ejecutá `./programa` y copiá la salida completa.
 
-> **R:**
+> **R:** === Laboratorio de Compilacion en C (v1.0) ===
+> sumar(3, 4)       = 7
+> CUADRADO(5)      = 25
+> MAX(7, 12)        = 12
+> area_circulo(5.0) = 78.5398
+> Factoriales:
+  0! = 1
+  1! = 1
+  2! = 2
+  3! = 6
+  4! = 24
+  5! = 120
+> Llamadas a sumar(): 1
+
+
+
 
 ¿Qué valor da `factorial(5)`? Escribí solo el número:
 
 <!-- Completá con el número exacto: -->
-FACTORIAL_5=
+FACTORIAL_5=120
 
 ---
 
@@ -1047,14 +1063,14 @@ FACTORIAL_5=
 como `CUADRADO(x)` y una **función real** como `sumar(a, b)`.
 ¿En qué etapa "desaparece" cada una? ¿Cuál tiene verificación de tipos?
 
-> **R:**
+> **R:** La diferencia es que durante el preprocesamiento la macro se expande y reemplaza el texto por lo definido, mientras que una función real se compila y ejecuta. Una macro función desaparece en tiempo de preprocesamiento y la función real se mantiene en el ejecutable tras la etapa de enlazado. La función real tiene verificación de tipos.
 
 ---
 
 **P17.** ¿Qué diferencia hay entre un símbolo de tipo `T` y uno de tipo `D`
 en la salida de `nm`? ¿En qué sección del archivo objeto vive cada uno?
 
-> **R:**
+> **R:** La diferencia es que el tipo T se refiere a funciones con código ejecutable, mientras que el tipo D es una variable global definida con un valor inicial. Un símbolo de tipo T vive en la sección text y un símbolo de tipo D vive en la sección data.
 
 ---
 
@@ -1065,7 +1081,7 @@ y copiá la salida.
 
 ¿Por qué `libc` no hubo que especificarla explícitamente al enlazar con `gcc`?
 
-> **R:**
+> **R:** Ya que `gcc` actúa aquí como un driver que invoca al enlazador real e incluye automáticamente a `libc`.
 
 ---
 
@@ -1259,18 +1275,53 @@ printf("%d\n", CUADRADO(n++));
 ```
 
 a. ¿Cuántas veces se evalúa `n++`? ¿Por qué?
+```
+n++ se evalúa dos veces ya que como x aparece dos veces, el argumento n++ se inserta dos veces. 
+```
 b. ¿Cuál sería el resultado? ¿Es el esperado?
+```
+El resultado sería un valor indefinido, como 12. No es el resultado esperado.
+```
 c. ¿Cómo se resolvería este problema usando una función real en lugar de una macro?
+```
+Una posible solución utilizando una función real puede ser:
+int cuadrado(int x) {
+    return x * x;
+}
+
+int n = 3;
+printf("%d\n", cuadrado(n++));
+
+```
 
 ### E2 — Provocar y leer errores del compilador
 
 a. **Error léxico:** en `programa.c`, escribí una cadena sin cerrar: `printf("hola`. Intentá compilar con `gcc -S programa.c`. ¿En qué etapa falla y qué dice el mensaje de error?
+```
+Rta.: Falla en la etapa de Análisis Léxico (Scanner). El mensaje de error dice: programa.c:96:8: error: missing terminating " character
+   96 | printf("hola
+      |        ^~~~~
+programa.c:96:1: error: expected declaration specifiers or '...' at end of input
+   96 | printf("hola
+      | ^~~~~~
+```
+
 
 b. **Error sintáctico:** quitá un `;` al final de una declaración de variable. ¿Qué reporta el compilador? ¿Menciona la línea correcta?
+```
+El compilador reporta error: expected ';' before '}' token.
+Sí, menciona la línea correcta.
+```
 
 c. **Error semántico:** cambiá la llamada `sumar(3, 4)` por `sumar(3, 4, 5)`. ¿En qué etapa falla? ¿Por qué es semántico y no sintáctico?
+```
+Falla en la etapa de Análisis Semántico. Es un error semántico ya que, a pesar de que su estructura es considerada correcta sintácticamente, el Análisis Semántico detecta que la operación no es compatible porque no coinciden la cantidad de parámetros.
+```
 
 d. **Error de enlazado:** comentá toda la implementación de `factorial` en `matematica.c` y recompilá solo el objeto (`gcc -c matematica.c -o matematica.o`). ¿Falla? Ahora intentá enlazar. ¿Cuándo falla y cuál es el mensaje exacto?
+```
+Al recompilar solo el objeto no falla, pero al enlazar falla y el mensaje es: collect2.exe: error: ld returned 5 exit status
+```
 
 ### E3 — Agregar una función nueva
 
@@ -1278,6 +1329,11 @@ a. Declarar en `matematica.h` el prototipo: `double potencia(double base, int ex
 b. Implementar la función en `matematica.c` sin usar `<math.h>`.
 c. Llamarla desde `main()` en `programa.c`.
 d. Compilar paso a paso y verificar con `nm` que el símbolo `potencia` aparece como `U` en `programa.o` y como `T` en el ejecutable final.
+```
+El símbolo potencia en programa.o: 0000000000000023 T main
+                 U potencia
+El símbolo potencia en el ejecutable final: 00000001400016a3 T potencia
+```
 
 ### E4 — Enlazado estático vs dinámico
 
@@ -1285,8 +1341,23 @@ a. Compilar el programa con enlazado estático: `gcc programa.c matematica.c -o 
 b. Comparar el tamaño del ejecutable dinámico vs el estático con `ls -lh programa programa_static`.
 c. Ejecutar `ldd programa_static` (Linux). ¿Qué diferencia hay respecto a `ldd programa`?
 
+
 ### E5 — Inspección con Clang
 
 a. Ejecutar `clang -Xclang -dump-tokens programa.c 2>&1 | grep "programa.c" | wc -l`. ¿Cuántos tokens tiene `programa.c`?
+```
+212
+```
 b. Buscar en la salida del AST (`clang -Xclang -ast-dump`) la función `factorial`. ¿Cómo se representa la recursión en el árbol?
+```
+ 'factorial' 'int (int)'
+|         `-BinaryOperator 0x16d8d6fd8b8 <col:26, col:30> 'int' '-'
+|           |-ImplicitCastExpr 0x16d8d6fd8a0 <col:26> 'int' <LValueToRValue>
+|           | `-DeclRefExpr 0x16d8d6fd860 <col:26> 'int' lvalue ParmVar 0x16d8d6
+fd610 'n' 'int'
+|           `-IntegerLiteral 0x16d8d6fd880 <col:30> 'int' 1
+```
 c. ¿Aparece algún `ImplicitCastExpr` en el AST? ¿Qué conversión realiza?
+```
+Si, aparece. Realiza conversiones del LValue al RValue.
+```

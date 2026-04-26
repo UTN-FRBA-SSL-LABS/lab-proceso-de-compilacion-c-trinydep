@@ -20,3 +20,6 @@ double area_circulo(double radio);
 int    factorial(int n);
 
 #endif /* MATEMATICA_H */
+
+// Prototipo de E3 - Agregar función nueva
+double potencia(double base, int exp);

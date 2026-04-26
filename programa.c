@@ -83,6 +83,11 @@ int main(void) {
 
     printf("Llamadas a sumar(): %d\n", llamadas);
 
+    // Llamar función potencia desde el main()
+    int base = 2, exp = 3;
+    printf("%d elevado a %d es: %lld\n", base, exp, potencia(base, exp));
+
+
     return EXIT_SUCCESS;
 }
 
@@ -92,3 +97,4 @@ int main(void) {
 void imprimir_separador(void) {
     printf("----------------------------------------\n");
 }
+

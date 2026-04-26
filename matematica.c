@@ -18,8 +18,19 @@ double area_circulo(double radio) {
 /*
  * factorial: calcula n! de forma recursiva.
  * Caso base: factorial(0) = factorial(1) = 1
- */
-int factorial(int n) {
+*/
+ int factorial(int n) {
     if (n <= 1) return 1;
     return n * factorial(n - 1);
+}
+
+/*
+* potencia Ejercicio 3 - Agregar función nueva
+*/
+double potencia(double base, int exponente) {
+    double resultado = 1;
+    for (int i = 0; i < exponente; i++) {
+        resultado *= base;
+    }
+    return resultado;
 }
